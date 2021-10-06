@@ -87,6 +87,41 @@ fetch('https://manlyman69.rocks/CA1/api/person', {
 }
 
 
+
+
+function seachPerson(evt){
+
+  var personRow;
+  let id = document.getElementById("seachId").innerHTML;
+
+  let URL = "https://manlyman69.rocks/CA1/api/person"
+  fetch(URL + `/${id}`)
+  .then(res=> res.json())
+  .then(person => {
+      personRow = person =>`
+        <tr>
+        <td>${person.id}</td>
+        <td>${person.firstName + " " + person.lastName}</td>
+        <td>${person.address.street}<br>${person.address.additionalInfo}</td>
+        <td>${person.phones.map(phone => `
+        ${phone.number}<br>${phone.description}
+        `)}</td>
+        <td>${person.hobbies.map(hobby => `
+        ${hobby.name}<br>${hobby.description}
+        `)}</td>
+      
+      </tr>`
+
+document.getElementById("seachUserRows").innerHTML = personRow;
+
+  })
+  
+}
+
+
+document.getElementById("seachBtn").onclick = seachPerson;
+
+
 /* 
 Do NOT focus on the code below, UNLESS you want to use this code for something different than
 the Period2-week2-day3 Exercises
