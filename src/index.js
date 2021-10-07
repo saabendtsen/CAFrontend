@@ -2,104 +2,114 @@ import "./style.css"
 import "bootstrap/dist/css/bootstrap.css"
 import "./jokeFacade"
 import jokeFacade from "./jokeFacade"
+import personFacade from "./personFacade"
 
 document.getElementById("all-content").style.display = "block"
 
-/* 
-  Add your JavaScript for all exercises Below or in separate js-files, which you must the import above
-*/
-
-/* JS For Exercise-1 below */
-
-
-/* JS For Exercise-2 below */
-
-
-
-/* JS For Exercise-3 below */
-
-
-const URL = "https://manlyman69.rocks/CA1/api/person"
-fetch(URL)
-.then(res=> res.json())
-.then(persons => {
+personFacade.getPersons()
+  .then(persons => {
+    console.log("i was clicked")
     const personRow = persons.map(person => `
-    <tr>
-      <td>${person.id}</td>
-      <td>${person.firstName + " " + person.lastName}</td>
-      <td>${person.address.street}<br>${person.address.additionalInfo}</td>
-      <td>${person.phones.map(phone => `
-      ${phone.number}<br>${phone.description}
-      `)}</td>
-      <td>${person.hobbies.map(hobby => `
-      ${hobby.name}<br>${hobby.description}
-      `)}</td>
+    ${createPersonRow(person)}`)
+
     
-    </tr>
-    `)
     const personAsString = personRow.join("")
     document.getElementById("allUserRows").innerHTML = personAsString;
-})
+  })
 
 
-document.getElementById("addPerson").addEventListener('click',addPerson);
+
 
 
 const data = {
   firstName: "Post",
   lastName: "Man",
   address: {
-      street: "Postaddress",
-      additionalInfo: "is a place",
-      cityInfoDTO: {
-          zipcode: "3911",
-          city: "Sisimiut"
-      }
+    street: "Postaddress",
+    additionalInfo: "is a place",
+    cityInfoDTO: {
+      zipcode: "3911",
+      city: "Sisimiut"
+    }
   },
   phones: [
-      {
-          number: 74921234,
-          description: "Jeg har en nokia"
-      }
+    {
+      number: 74921234,
+      description: "Jeg har en nokia"
+    }
   ],
   hobbies: [
-      {
-          name: "Bus spotting"
-      }
+    {
+      name: "Bus spotting"
+    }
   ]
 }
 
-function addPerson(){
-fetch('https://manlyman69.rocks/CA1/api/person', {
-  method: 'POST', // or 'PUT'
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify(data),
-})
-.then(response => response.json())
-.then(data => {
-  console.log('Success:', data);
-})
-.catch((error) => {
-  console.error('Error:', error);
-});
+
+function addPerson() {
+  console.log("i was clicked")
+
+  const data = {
+    firstName: document.getElementById("fname").value,
+    lastName: document.getElementById("lname").value,
+    address: {
+      street: document.getElementById("street").value,
+      additionalInfo: document.getElementById("addressAdditionalInfo").value,
+      cityInfoDTO: {
+        zipcode: document.getElementById("zipcode").value,
+        city: document.getElementById("city").value
+      }
+    },
+    phones: [
+      {
+        number: document.getElementById("phoneNr").value,
+        description: document.getElementById("phoneDes").value
+      }
+    ],
+    hobbies: [
+      {
+        name: document.getElementById("hobbyName").value,
+        description: document.getElementById("hobbyDes").value
+      }
+    ]
+  }
+
+
+  personFacade.addPerson(data)
+    .then(data => {
+      console.log('Success:', data);
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
 }
 
 
-
-
-function seachPerson(evt){
-
+function seachPerson(id) {
   var personRow;
-  let id = document.getElementById("seachId").innerHTML;
+  personFacade.getPerson(id)
+    .then(person => {
+      personRow = `
 
-  let URL = "https://manlyman69.rocks/CA1/api/person"
-  fetch(URL + `/${id}`)
-  .then(res=> res.json())
-  .then(person => {
-      personRow = person =>`
-        <tr>
+      <thead>
+      <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Phones</th>
+        <th>Hobbies</th>
+    </thead>
+        ${createPersonRow(person)}`
+      document.getElementById("seachUserRows").innerHTML = personRow;
+    })
+
+}
+
+
+function createPersonRow(person){
+
+  return `
+  <tr>
         <td>${person.id}</td>
         <td>${person.firstName + " " + person.lastName}</td>
         <td>${person.address.street}<br>${person.address.additionalInfo}</td>
@@ -109,17 +119,45 @@ function seachPerson(evt){
         <td>${person.hobbies.map(hobby => `
         ${hobby.name}<br>${hobby.description}
         `)}</td>
-      
       </tr>`
-
-document.getElementById("seachUserRows").innerHTML = personRow;
-
-  })
-  
 }
 
 
-document.getElementById("seachBtn").onclick = seachPerson;
+function deletePerson() {
+  const id = document.getElementById("deleteId").value;
+
+  personFacade.deletePerson(id).then(person =>
+    alert(person.name + "has been deleted")
+    );
+
+}
+
+function sortSeach(){
+  const id = document.getElementById("seachId");
+  const hobby = document.getElementById("seachHobby");
+
+  if (id.value){
+    seachPerson(id.value);
+  } else if ( hobby.value){
+    console.log( hobby.value)
+
+  }
+  
+
+
+  
+
+}
+
+
+document.getElementById("seachBtn").onclick = sortSeach;
+
+document.getElementById("deleteBtn").onclick = deletePerson;
+
+document.getElementById("addPersonbtn").onclick = addPerson;
+
+document.getElementById("refreshList").onclick = personFacade.getPersons;
+
 
 
 /* 
