@@ -3,52 +3,70 @@ import "bootstrap/dist/css/bootstrap.css"
 import "./jokeFacade"
 import jokeFacade from "./jokeFacade"
 import personFacade from "./personFacade"
+import * as bootstrap from 'bootstrap';
+import '@popperjs/core';
+import { computeStyles } from "@popperjs/core"
 
 document.getElementById("all-content").style.display = "block"
+updateList()
 
-personFacade.getPersons()
-  .then(persons => {
-    console.log("i was clicked")
-    const personRow = persons.map(person => `
+document.getElementById("allUserRows").addEventListener('click', e => {
+  e.preventDefault();
+  const node = e.target;
+  const name = node.getAttribute("name")
+  const id = node.getAttribute("id")
+
+  switch (name) {
+    case "edit": editPerson(id); editModal.toggle; break;
+    case "delete": personFacade.deletePerson(id); break;
+  }
+
+})
+
+let modalElement = document.getElementById("editmodal")
+let editModal = new bootstrap.Modal(modalElement)
+
+
+
+function updateList() {
+  personFacade.getPersons()
+    .then(persons => {
+      console.log("i was clicked")
+      const personRow = persons.map(person => `
     ${createPersonRow(person)}`)
 
-    
-    const personAsString = personRow.join("")
-    document.getElementById("allUserRows").innerHTML = personAsString;
-  })
-
-
-
-
-
-const data = {
-  firstName: "Post",
-  lastName: "Man",
-  address: {
-    street: "Postaddress",
-    additionalInfo: "is a place",
-    cityInfoDTO: {
-      zipcode: "3911",
-      city: "Sisimiut"
-    }
-  },
-  phones: [
-    {
-      number: 74921234,
-      description: "Jeg har en nokia"
-    }
-  ],
-  hobbies: [
-    {
-      name: "Bus spotting"
-    }
-  ]
+      const personAsString = personRow.join("")
+      document.getElementById("allUserRows").innerHTML = personAsString;
+    })
 }
 
 
-function addPerson() {
-  console.log("i was clicked")
+function editPerson(id) {
+  personFacade.getPerson(id)
+    .then(data => {
+       
+        document.getElementById("edit_id").value = data.id
+        document.getElementById("fName").value = data.firstName
+        document.getElementById("lName").value = data.lastName
+         const phonerow = data.phones.map(element => {
+          
+      `<label for="phone">Phone ${element.id}</label>
+      <input type="text" id="phoneNumer" name="phoneNumer" class="form-control" value="${element.number}"></input>
+      <input type="text" id="phoneDes" name="phoneDes" class="form-control" value="${element.description}"></input>`
+        })
+        const phonesAsString  = phonerow.join("")
+        console.log(phonesAsString)
+        document.getElementById("phones").innerHTML = phonesAsString
+        document.getElementById("street").value = data.street
+        document.getElementById("zip").value = data.zip
+        document.getElementById("city").value = data.city
+      })
+    .then(editModal.toggle());
+    
+    
+}
 
+function addPerson() {
   const data = {
     firstName: document.getElementById("fname").value,
     lastName: document.getElementById("lname").value,
@@ -73,8 +91,6 @@ function addPerson() {
       }
     ]
   }
-
-
   personFacade.addPerson(data)
     .then(data => {
       console.log('Success:', data);
@@ -85,40 +101,61 @@ function addPerson() {
 }
 
 
-function seachPerson(id) {
+function seachPersonByID(id) {
   var personRow;
   personFacade.getPerson(id)
     .then(person => {
-      personRow = `
+      personRow = `     
+      ${createPersonRow(person)}`
 
-      <thead>
+      const stringWithHeader = createPersonHeader() + personRow;
+      document.getElementById("seachUserRows").innerHTML = stringWithHeader;
+    })
+}
+
+function seachPersonsByHobby(hobby) {
+  personFacade.getByHobby(hobby)
+    .then(persons => {
+      const personRow = persons.map(person => `
+  ${createPersonRow(person)}`)
+
+      const personAsString = personRow.join("")
+      const personWithHeader = createPersonHeader() + personAsString;
+      document.getElementById("seachUserRows").innerHTML = personWithHeader;
+    })
+}
+
+
+
+function createPersonHeader() {
+  return `
+  <thead>
       <tr>
         <th>Id</th>
         <th>Name</th>
         <th>Address</th>
         <th>Phones</th>
         <th>Hobbies</th>
-    </thead>
-        ${createPersonRow(person)}`
-      document.getElementById("seachUserRows").innerHTML = personRow;
-    })
-
+        <th></th>
+        </tr>
+  </thead>
+  
+  `
 }
 
-
-function createPersonRow(person){
+function createPersonRow(person) {
 
   return `
-  <tr>
+      <tr>
         <td>${person.id}</td>
         <td>${person.firstName + " " + person.lastName}</td>
-        <td>${person.address.street}<br>${person.address.additionalInfo}</td>
+        <td>${person.address.street}<br>${person.address.additionalInfo}<br>${person.address.cityInfoDTO.city}<br>${person.address.cityInfoDTO.zipcode}</td>
         <td>${person.phones.map(phone => `
-        ${phone.number}<br>${phone.description}
-        `)}</td>
+        ${phone.number}<br>${phone.description}`)}</td>
         <td>${person.hobbies.map(hobby => `
-        ${hobby.name}<br>${hobby.description}
-        `)}</td>
+        ${hobby.name}<br>${hobby.description}`)}</td>
+        <td><input id="${person.id}" type="button"  name="edit" value="edit"/></td>
+        <td><input id="${person.id}" type="button"  name="delete" value="delete"/></td>
       </tr>`
 }
 
@@ -128,24 +165,24 @@ function deletePerson() {
 
   personFacade.deletePerson(id).then(person =>
     alert(person.name + "has been deleted")
-    );
+  );
 
 }
 
-function sortSeach(){
+function sortSeach() {
   const id = document.getElementById("seachId");
   const hobby = document.getElementById("seachHobby");
 
-  if (id.value){
-    seachPerson(id.value);
-  } else if ( hobby.value){
-    console.log( hobby.value)
+  if (id.value) {
+    seachPersonByID(id.value);
+  } else if (hobby.value) {
+    seachPersonsByHobby(hobby.value)
 
   }
-  
 
 
-  
+
+
 
 }
 
@@ -156,7 +193,7 @@ document.getElementById("deleteBtn").onclick = deletePerson;
 
 document.getElementById("addPersonbtn").onclick = addPerson;
 
-document.getElementById("refreshList").onclick = personFacade.getPersons;
+document.getElementById("refreshList").onclick = updateList;
 
 
 
@@ -177,7 +214,7 @@ function menuItemClicked(evt) {
   const id = evt.target.id;
 
   switch (id) {
-    case "ex1": hideAllShowOne("ex1_html"); break
+    case "ex1": hideAllShowOne("ex1_html"); updateList(); break
     case "ex2": hideAllShowOne("ex2_html"); break
     case "ex3": hideAllShowOne("ex3_html"); break
     default: hideAllShowOne("about_html"); break

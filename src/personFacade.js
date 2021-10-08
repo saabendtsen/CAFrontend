@@ -1,26 +1,36 @@
-//const URL = "https://manlyman69.rocks/CA1/api/person"
+const URL = "https://manlyman69.rocks/CA1/api/person"
 //const URL = "http://192.168.1.59:8081/CA1-1.0.1/api/person" //HP server
-const URL = "http://localhost:8080/CA1_war_exploded/api/person" //Localhost
+//const URL = "http://localhost:8080/CA1_war_exploded/api/person" //Localhost
 
 
 
 function getPersons(){
     return fetch(URL)
-    .then(res => res.json())
+    .then(res => handleHttpErrors(res))
 }
 
 function getPerson(id){
   return fetch(`${URL}/${id}`)
-  .then(res => res.json())
+  .then(res => handleHttpErrors(res))
+}
+
+function getByHobby(hobby){
+  return fetch(`${URL}/hobby/${hobby}`)
+
+  .then(res => handleHttpErrors(res))
 }
 
 function addPerson(person){
     const options = makeOptions("POST",person)
     return fetch(URL,options)
-    .then(res => res.json())
+    .then(res => handleHttpErrors(res))
 }
 
 function editPerson(person){
+    const options = makeOptions("PUT",person)
+    return fetch(URL,options)
+  
+    .then(res => handleHttpErrors(res))
 
 }
 
@@ -28,13 +38,15 @@ function deletePerson(id){
   console.log(id)
   const options = makeOptions("DELETE")
   return fetch(`${URL}/${id}`,options)
-  .then(res => res.json())
+  
+  .then(res => handleHttpErrors(res))
 }
 
 
 const personFacade = {
     getPersons,
     getPerson,
+    getByHobby,
     addPerson,
     editPerson,
     deletePerson
