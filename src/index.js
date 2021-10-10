@@ -44,18 +44,27 @@ function updateList() {
 function editPerson(id) {
   personFacade.getPerson(id)
     .then(data => {
-      console.log(data.address.street)
+      //console.log(data.phones)
        
         document.getElementById("edit_id").value = data.id
         document.getElementById("fName").value = data.firstName
         document.getElementById("lName").value = data.lastName
+        const phonerow = data.phones.map(element => {
+           
+          `<label for="phone">Phone ${element.id}</label>
+          <input type="text" id="phoneNumer${element.id}" name="phoneNumer" class="form-control" value="${element.number}"></input>
+          <input type="text" id="phoneDes${element.id}" name="phoneDes" class="form-control" value="${element.description}"></input>`
+          console.log(element)    
+        })
+            const phonesAsString  = phonerow.join("")
+            console.log(phonesAsString)
+            document.getElementById("phonesModal").innerHTML = phonesAsString
         
         document.getElementById("streetModal").value = data.address.street
         document.getElementById("zipModal").value = data.address.cityInfoDTO.zipcode
         document.getElementById("cityModal").value = data.address.cityInfoDTO.city
       })
     .then(editModal.toggle());
-    
     
 }
 
@@ -188,6 +197,8 @@ function sortSeach() {
 document.getElementById("seachBtn").onclick = sortSeach;
 
 document.getElementById("deleteBtn").onclick = deletePerson;
+
+document.getElementById("modal-edit-save-btn").onclick = deletePerson;
 
 document.getElementById("addPersonbtn").onclick = addPerson;
 
