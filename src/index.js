@@ -44,22 +44,15 @@ function updateList() {
 function editPerson(id) {
   personFacade.getPerson(id)
     .then(data => {
+      console.log(data.address.street)
        
         document.getElementById("edit_id").value = data.id
         document.getElementById("fName").value = data.firstName
         document.getElementById("lName").value = data.lastName
-         const phonerow = data.phones.map(element => {
-          
-      `<label for="phone">Phone ${element.id}</label>
-      <input type="text" id="phoneNumer" name="phoneNumer" class="form-control" value="${element.number}"></input>
-      <input type="text" id="phoneDes" name="phoneDes" class="form-control" value="${element.description}"></input>`
-        })
-        const phonesAsString  = phonerow.join("")
-        console.log(phonesAsString)
-        document.getElementById("phones").innerHTML = phonesAsString
-        document.getElementById("street").value = data.street
-        document.getElementById("zip").value = data.zip
-        document.getElementById("city").value = data.city
+        
+        document.getElementById("streetModal").value = data.address.street
+        document.getElementById("zipModal").value = data.address.cityInfoDTO.zipcode
+        document.getElementById("cityModal").value = data.address.cityInfoDTO.city
       })
     .then(editModal.toggle());
     
@@ -161,11 +154,16 @@ function createPersonRow(person) {
 
 
 function deletePerson() {
+
   const id = document.getElementById("deleteId").value;
 
-  personFacade.deletePerson(id).then(person =>
+  const person = personFacade.getPerson(id).then(getPerson => person = getPerson)
+  
+  personFacade.deletePerson(id).then(
     alert(person.name + "has been deleted")
   );
+
+  updateList;
 
 }
 

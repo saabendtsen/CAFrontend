@@ -29,7 +29,6 @@ function addPerson(person){
 function editPerson(person){
     const options = makeOptions("PUT",person)
     return fetch(URL,options)
-  
     .then(res => handleHttpErrors(res))
 
 }
@@ -38,7 +37,6 @@ function deletePerson(id){
   console.log(id)
   const options = makeOptions("DELETE")
   return fetch(`${URL}/${id}`,options)
-  
   .then(res => handleHttpErrors(res))
 }
 
